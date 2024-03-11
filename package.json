@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "socket.io": "^2.3.0"
+  },
+  "name": "socket",
+  "description": "",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/socket.io": "^3.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel ./week01/index.html",
+    "build": "parcel build ./week01/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

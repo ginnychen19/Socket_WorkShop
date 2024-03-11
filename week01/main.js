@@ -6,10 +6,15 @@ $(function(){
 
     /*登入事件*/
     $('.login-btn').click(function(){
-        myName = $.trim($('#loginName').val());
+        myName = $.trim($('#loginName').val()); //$.trim => 去除空格
         if(myName){
             /*發送事件*/
+            //.emit => 用於發送事件
             socket.emit('login', {username: myName})
+            /* 在前台收後台的資料 */
+            socket.on('login', function(data){
+                console.log(data);
+            })
         }else{
             alert('Please enter a name:)')
         }
