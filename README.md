@@ -32,19 +32,18 @@ Server收到請求後，廣播該訊息給所有連接的Client <br>
 Client收到Server傳來的訊息後，判斷用戶名稱是否為自己，對話顯示在相應位置 <br>
 
 ### 注意
-socket.io需要處理跨域問題(如果客户端和服务器端不在同一个域上)，所以要在假後台裡用這個
-var io = require('socket.io')(app, {
+socket.io需要處理跨域問題(如果客户端和服务器端不在同一个域上)，所以要在假後台裡用這個 <br> 
+<pre><code>var io = require('socket.io')(app, {
     cors: {
         origin: "我用run dev 時開的網址",  // 允许哪些 URL 可以访问资源
         methods: ["GET", "POST"],  // 允许哪些 HTTP 方法访问资源
         allowedHeaders: ["my-custom-header"],  // 允许哪些 HTTP 头部访问资源
         credentials: true  // 是否允许发送 Cookie
     }
-});
-
-如果是直接用原生的websocket，則可以不用處理cors
-原生 WebSocket 協定 (ws:// 和 wss://) 並未直接受 CORS 策略的限制，因為 WebSocket 不遵循同源策略（SOP）
-大多數情況下不強制要求 CORS 回應頭。
+});</code></pre>
+如果是直接用原生的websocket，則可以不用處理cors <br> 
+原生 WebSocket 協定 (ws:// 和 wss://) 並未直接受 CORS 策略的限制，因為 WebSocket 不遵循同源策略（SOP）<br> 
+大多數情況下不強制要求 CORS 回應頭。 <br> 
 
 ### 加入Fly.io 後端部署平台
 https://fly.io/ <br>
@@ -56,11 +55,11 @@ https://ithelp.ithome.com.tw/articles/10307847 <br>
 03. 關掉vscode，然後重新啟動powershell，輸入 flyctl auth login 登入帳號 (沒有的話去辦一個)
 04. 接著，把我們的server檔獨立到一個資料夾裡面，並且建立一個package.json
     然後加入
-    "scripts": {
+    <pre><code>"scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node <你的server檔>",
         "dev":"npx nodemon <你的server檔>"
-    }, 
+    },</code></pre> 
 05. 把終端機cd(移動)到要上傳到fly.io的sever資料夾    
 06. 在終端執行 flyctl launch 做完自己的新開檔案設定
 07. 在終端執行 fly deploy 把sever檔案上傳到fly.io，這樣就可以使用拉~
