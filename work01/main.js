@@ -1,8 +1,11 @@
+import { io } from 'socket.io-client';
+
 $(function () {
     /*01.建立socket連接，連向server監聽的端口號*/
-    var socket = io('ws://localhost:8080');
+    var socket = io('https://eliza-01-socketchatroom.fly.dev/');
     var myName = null;
 
+    console.log(socket);
     /*A.登入事件*/
     // A-1.取得使用者輸入的姓名
     $('.login-btn').click(function () {
@@ -29,7 +32,6 @@ $(function () {
             alert('Wrong username:( Please try again!')
         }
     })
-
     // A-3.socket登入失敗 - loginFail
     socket.on('loginFail', function () {
         alert('Duplicate name already exists:0')
@@ -45,7 +47,7 @@ $(function () {
         $('.login-wrap').hide('slow');
         $('.chat-wrap').show('slow');
     }
-
+    
     /*B.退出事件 */
     // b-1.點擊退出時確認是否真的要退出
     $('.leaveBtn').click(function () {
@@ -72,6 +74,14 @@ $(function () {
     socket.on('leave', function (data) {
         if (data.username != null) {
             let html = `<p>${data.username} 退出聊天室</p>`;
+            $('.chat-con').append(html);
+            document.getElementById('chat-title').innerHTML = `在線人數: ${data.userCount}`;
+        }
+    })
+    // b-4.退出提示 (在socket 觸發logout時被調用)
+    socket.on('leaveAuto', function (data) {
+        if (data.username != null) {
+            let html = `<p>${data.username} 從聊天室斷線拉!</p>`;
             $('.chat-con').append(html);
             document.getElementById('chat-title').innerHTML = `在線人數: ${data.userCount}`;
         }

@@ -31,30 +31,20 @@ export class PhysicsWorld {
             );
         });
         // 繪製Debug線段外框
-        // this.renderDebugShapes(this.scene, this.world);
+        this.renderDebugShapes(this.scene, this.world);
     }
     step() { //用于推进物理世界的模拟时间
         this.world.step();
     }
 
     myTest() {
-        // 物理設地板
-        const r_body = this.world.createRigidBody(RAPIER.RigidBodyDesc.fixed());
-        r_body.setTranslation(new THREE.Vector3(0, 0, 0));
-        
-        //setTranslation 設置剛體的位置 , cuboid( 方塊形狀 )
-        this.world.createCollider(RAPIER.ColliderDesc.cuboid(250, 1, 250), r_body);
+        /* 轉轉長方體的物理 */
+        // const r_body2 = this.world.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased());
+        // r_body2.setTranslation(new THREE.Vector3(0, 10, 0));
 
-        /* 圓球物理 */
-        let colliderDesc = new RAPIER.ColliderDesc(new RAPIER.Ball(1))
-            .setTranslation(0.0, 20, 0.0)
-            // .setRotation({ w: 1.0, x: 0.0, y: 0.0, z: 0.0 })
-            // .setDensity(1.3) //密度 (會影響質量、角慣性張量-angular inertia tensor 的計算)
-            .setFriction(2)
-            .setRestitution(0.1)
+        // const colliderDesc = RAPIER.ColliderDesc.cuboid(10, 5, 10);
+        // this.world.createCollider(colliderDesc, r_body2);
 
-        let rigidBody = this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic());
-        let collider = this.world.createCollider(colliderDesc, rigidBody);
     }
 
     /* Debug線條 */
@@ -91,6 +81,7 @@ export class PhysicsWorld {
     }
     /* 製作不動的場景 */
     createScene(model) {
+        let Mycollider = null;
         model.traverse(child => {
             if (child.isMesh) {
                 const rigidBodyDesc = RAPIER.RigidBodyDesc.fixed()
@@ -104,22 +95,16 @@ export class PhysicsWorld {
                 let colliderDesc;
                 if (indices) { // 用三角面的方式計算 
                     colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-                    colliderDesc.setTranslation(0.0, 1, 0.0) // 因為場景位移有往上提高1，所以這裡也要提高1
+                    colliderDesc.setTranslation(0.0, 0.0, 0.0); 
                 }
-                this.world.createCollider(colliderDesc, rigidBody);
+                Mycollider = this.world.createCollider(colliderDesc, rigidBody);
                 child.userData.rigidBody = rigidBody; //因為很常需要設定所以乾脆直接新增到變數
             }
         });
 
-        // 物理設地板
-        const r_body = this.world.createRigidBody(RAPIER.RigidBodyDesc.fixed());
-        r_body.setTranslation(new THREE.Vector3(0, 0, 0));
-
-        //setTranslation 設置剛體的位置 , cuboid( 方塊形狀 )
-        this.world.createCollider(RAPIER.ColliderDesc.cuboid(250, 1, 250), r_body);
-
-        return model;
+        return {model, Mycollider};
     }
+   
     /* 其他物件的RigidBody製作 */
     createRigidBody(model, position, type = 'dynamic', mass = 1) {
         let points = [];
@@ -167,7 +152,6 @@ export class PhysicsWorld {
 
         // 這個就是物理禿包計算
         const hullColliderDesc = RAPIER.ColliderDesc.convexHull(points).setMass(mass); //在這裡加入重量
-        
         this.world.createCollider(hullColliderDesc, rigidBody);
 
         return { model, rigidBody, rigidBodyDesc };

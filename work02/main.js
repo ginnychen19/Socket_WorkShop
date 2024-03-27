@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import * as RAPIER from '@dimforge/rapier3d-compat';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { PhysicsWorld } from './physicsWorld.js';
 import { Loadings } from './loading.js';
 import { InputHandler } from './input.js';
 import { Camera } from './camera.js';
 import { Player } from './player.js';
+
+import { io } from 'socket.io-client';//npm i --save-dev socket.io-client
 
 class ThreeScene {
     constructor() {
@@ -21,9 +22,15 @@ class ThreeScene {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.25;
 
-        /* 物理世界必須優先啟動 */
-        this.physicsWorld = new PhysicsWorld(this);
         this.LD = new Loadings(this);
+
+        /* 加入socket */
+        this.socket = io('ws://localhost:3000');
+        console.log(this.socket);
+        this.myId = '';
+        this.timestamp = 0;
+        this.clientCubes = {};// 儲存所有用戶的方塊
+
 
         /* 鍵盤與手指移動輸入控制 */
         this.Input = new InputHandler(this);
@@ -32,11 +39,11 @@ class ThreeScene {
         this.height = window.innerHeight;
         this.width = window.innerWidth;
         this.onWindowResize(this);
+
     }
     async init() {
-        await this.physicsWorld.init();
         //要把加入碰撞場景，加入鍵盤監聽 ，加入汽車 Vehicle 這個檔在完成this.LD.init()才可以加入
-        await this.LD.init(this.createObj.bind(this), this.createvehicle.bind(this));
+        await this.LD.init(this.createObj.bind(this), this.createSocket.bind(this));
 
         this.createScene();
         this.creatSkybox();
@@ -61,9 +68,9 @@ class ThreeScene {
 
     /* 建立基礎世界 + Resize */
     createScene() {
-        this.scene.fog = new THREE.Fog(0xffffaa, 1000, 2000)
+        this.scene.fog = new THREE.Fog(0xffffff, 50, 200)
         // this.scene.fog = new THREE.FogExp2(0xffffaa, 0.001);
-        this.scene.background = new THREE.Color(0xffffaa);
+        this.scene.background = new THREE.Color(0xffffff);
     }
     creatSkybox() {
     }
@@ -144,6 +151,59 @@ class ThreeScene {
         m_city.position.set(0, 1, 0);
         this.scene.add(m_city);
     }
+
+    /* socket */
+
+    /* "dev": "concurrently \"node ./work02/server/server.mjs\" \"npx parcel ./work02/index.html\"", */
+    createSocket() {
+        this.socket.emit('iamfromClient', "我是客戶端");
+
+        // D-1.socket 收到 伺服器的 connect 事件 (只是客戶端用來確認自己是否連上socket)
+        this.socket.on("connection-successful", function (message) {
+            console.log(message);
+        });
+        // D-2.socket 收到 伺服器的 disconnect 事件 (只是客戶端用來確認自己是否斷線，除非我自己關掉Server，不然應該不會觸發)
+        this.socket.on('disconnect', function (message) {
+            console.log('連接失敗 ' + message);
+        });
+        console.log(this.socket);
+        // D-3.socket 收到 伺服器的 id 事件，生成第一個方塊(自己)
+        this.socket.on('getId', (elem1) => {
+            console.log(elem1);
+            this.createOrUpdateBlock(id);
+            // this.socket.emit('update', {
+            //     t: Date.now(),
+            //     p: myObject3D.position,
+            //     r: myObject3D.rotation,
+            // });
+        });
+
+        this.socket.on('clients', (elem1) => {
+            console.log(elem1);
+        });
+
+    }
+    createOrUpdateBlock({ id, color, rotation, position }) {
+        if (!this.clientCubes[id]) {
+            // 如果方块不存在，则创建
+            const geometry = new THREE.BoxGeometry(5, 5, 5);
+            const material = new THREE.MeshBasicMaterial({ color: color });
+            this.clientCubes[id] = new THREE.Mesh(geometry, material);
+            this.scene.add(this.clientCubes[id]);
+        }
+
+        // 更新方块的位置和旋转
+        block.position.set(position.x, position.y, position.z);
+        block.rotation.set(rotation, rotation, rotation);
+    }
+    removeBlock(userId) {
+        const block = this.blocks[userId];
+        if (block) {
+            this.scene.remove(block); // 从场景中移除方块
+            delete this.blocks[userId]; // 从 blocks 对象中删除引用
+        }
+    }
+
     createPlayer() {
         this.player = new Player(this, this.Input, this.camera);
         this.player.init();

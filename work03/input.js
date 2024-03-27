@@ -1,21 +1,21 @@
-export const keyboardState = { 
-    accelerate: false,    //加速
-    brake: false,         //煞車
-    steerLeft: false,     //向左轉向
-    steerRight: false,    //往右轉向
-    emergencyBrake: false //緊急煞車
+export const keyboardState = {
+    front: false,    //前
+    back: false,     //後
+    left: false,     //向左轉向
+    right: false,    //向右轉向
+    jump: false      //跳
 };
 export const touchState = {
-    accelerate: false,
-    brake: false,
-    steerLeft: false,
-    steerRight: false,
-    emergencyBrake: false
+    front: false,    
+    back: false,        
+    left: false,     
+    right: false,   
+    jump: false //緊急煞車
 };
 
 // 按鍵設定
 const W = ['w', 'arrowup'];
-const A = ['a', 'arrowleft']; 
+const A = ['a', 'arrowleft'];
 const S = ['s', 'arrowdown'];
 const D = ['d', 'arrowright'];
 const R = ['r'];
@@ -27,12 +27,12 @@ export class InputHandler {
         this.keyboardState = keyboardState;
         this.touchState = touchState;
 
-        this.keysPressed = {};       //紀錄案件
-        this.accelerate = false;     //加速
-        this.brake = false;          //煞車
-        this.steerLeft = false;      //向左轉向
-        this.steerRight = false;     //往右轉向
-        this.emergencyBrake = false; //緊急煞車
+        this.keysPressed = {};       //紀錄按鍵狀態
+        this.front = false;          //往前
+        this.brake = false;          //退後
+        this.left = false;           //向左轉向
+        this.right = false;          //向右轉向
+        this.jump = false;           //跳躍  
         this.reset = false;          //回到原點
 
         this.touchStart = { x: 0, y: 0 }; //joystick可使用 (手機端移動)
@@ -55,11 +55,11 @@ export class InputHandler {
     }
 
     updateKeyboardState() {/* 從這裡去更新 我們現在要執行那些動作 */
-        this.keyboardState.accelerate = this.isPressed(W);          //加速
-        this.keyboardState.brake = this.isPressed(S);               //煞車 or 往後?
-        this.keyboardState.steerLeft = this.isPressed(A);           //向左轉
-        this.keyboardState.steerRight = this.isPressed(D);          //向後轉
-        this.keyboardState.emergencyBrake = this.isPressed(SPACE);  //緊急煞車
+        this.keyboardState.front = this.isPressed(W);               //加速
+        this.keyboardState.back = this.isPressed(S);               //煞車 or 往後?
+        this.keyboardState.left = this.isPressed(A);           //向左轉
+        this.keyboardState.right = this.isPressed(D);          //向後轉
+        this.keyboardState.jump = this.isPressed(SPACE);  //緊急煞車
         this.keyboardState.reset = this.isPressed(R);               //歸0
     }
 
@@ -77,18 +77,18 @@ export class InputHandler {
         const dx = touch.clientX - this.touchStart.x;
         const dy = touch.clientY - this.touchStart.y;
 
-        this.touchState.accelerate = Math.abs(dy) > this.touchThreshold && dy < 0;
-        this.touchState.brake = Math.abs(dy) > this.touchThreshold && dy > 0;
-        this.touchState.steerLeft = Math.abs(dx) > this.touchThreshold && dx < 0;
-        this.touchState.steerRight = Math.abs(dx) > this.touchThreshold && dx > 0;
+        this.touchState.front = Math.abs(dy) > this.touchThreshold && dy < 0;
+        this.touchState.back = Math.abs(dy) > this.touchThreshold && dy > 0;
+        this.touchState.left = Math.abs(dx) > this.touchThreshold && dx < 0;
+        this.touchState.right = Math.abs(dx) > this.touchThreshold && dx > 0;
     }
 
     onTouchEnd(event) {
         this.touching = false;
         // 停止所有操作
-        this.touchState.accelerate = false;
-        this.touchState.brake = false;
-        this.touchState.steerLeft = false;
-        this.touchState.steerRight = false;
+        this.touchState.front = false;
+        this.touchState.back = false;
+        this.touchState.left = false;
+        this.touchState.right = false;
     }
 }

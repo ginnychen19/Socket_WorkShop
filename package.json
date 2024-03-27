@@ -1,22 +1,40 @@
 {
   "dependencies": {
-    "socket.io": "^4.7.4"
+    "@dimforge/rapier3d-compat": "^0.12.0",
+    "concurrently": "^8.2.2",
+    "express": "^4.18.3",
+    "gsap": "^3.12.5",
+    "socket.io": "^4.7.4",
+    "three": "^0.162.0"
   },
   "name": "socket",
   "description": "",
   "version": "1.0.0",
   "devDependencies": {
-    "@types/socket.io": "^3.0.2",
-    "@types/socket.io-client": "^3.0.0",
+    "@flydotio/dockerfile": "^0.5.3",
+    "assert": "^2.1.0",
+    "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "process": "^0.11.10"
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "querystring-es3": "^0.2.1",
+    "socket.io-client": "^4.7.4",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "timers-browserify": "^2.0.12",
+    "url": "^0.11.3",
+    "util": "^0.12.5",
+    "vm-browserify": "^1.1.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel ./week01/index.html",
-    "build": "parcel build ./week01/index.html"
+    "dev": "parcel ./work02/index.html",
+    "build": "parcel build ./work02/index.html"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "type": "module"
 }

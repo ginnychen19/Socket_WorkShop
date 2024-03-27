@@ -31,7 +31,7 @@ export class Loadings {
        p_物件名稱 => 表示粒子貼圖類資源
     */
 
-    async init(fun_createSence, fun_createvehicle) {
+    async init(fun_createSence, fun_createSocket) {
         try {
             const m_city = await Promise.all([
                 this.loadingGLTF3DModel('./assest/models/city.glb', 'city')
@@ -43,10 +43,10 @@ export class Loadings {
                 this.loadingGLTF3DModel('./assest/models/carwheel.glb', 'carWheel')
             ]);
 
-
             // 所有資源載入完成後執行後續操作
             fun_createSence(...m_city);
-            fun_createPlayer();
+            fun_createSocket();
+            // fun_createPlayer();
 
         } catch (error) {
             console.error("Error loading resources:", error);
@@ -73,7 +73,6 @@ export class Loadings {
         });
     }
     /* 和OBJ還有Fbx不同，gltf或glb需要找到 .scene 才是模型 */
-
     async loadingGLTF3DModel(src, theName) {
         return new Promise((resolve, reject) => {
             // 傳資訊給worker
@@ -82,6 +81,7 @@ export class Loadings {
             // worker返回模型資訊，解析的工作回到主線程
             this.worker.onmessage = (event) => {
                 if (event.data.action === 'loaded') {
+                    /** @type {ArrayBuffer} */
                     const arrayBuffer = event.data.model;
 
                     // 用GLTFloader的.parse方法

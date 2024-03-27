@@ -36,7 +36,7 @@ class ThreeScene {
     async init() {
         await this.physicsWorld.init();
         //要把加入碰撞場景，加入鍵盤監聽 ，加入汽車 Vehicle 這個檔在完成this.LD.init()才可以加入
-        await this.LD.init(this.createObj.bind(this), this.createvehicle.bind(this));
+        await this.LD.init(this.createBasicScene.bind(this), this.createPlayer.bind(this));
 
         this.createScene();
         this.creatSkybox();
@@ -51,6 +51,8 @@ class ThreeScene {
         this.Camera.update();
         if (this.player) this.player.update();
         this.physicsWorld.update();
+
+        this.updateSceneAni();
     }
     animate() {
         const deltaTime = this.clock.getDelta();
@@ -115,12 +117,12 @@ class ThreeScene {
 
 
     /* 測試加入物件 */
-    createObj(m_city) {
+    createBasicScene() {
         const that = this;
         const Mt_map = [
             new THREE.MeshLambertMaterial({
                 color: 0x434343,
-                // side: THREE.DoubleSide,
+                side: THREE.DoubleSide,
             }),
             new THREE.MeshLambertMaterial({
                 color: 0xFFFF00,
@@ -129,33 +131,55 @@ class ThreeScene {
         ]
 
         /* 地板 */
-        const planeGeom = new THREE.PlaneGeometry(500, 500, 1, 1);
-        const plane = new THREE.Mesh(planeGeom, Mt_map[0]);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.set(0, 0, 0);
-        this.scene.add(plane);
+        const planeGeom = new THREE.CircleGeometry(20, 16);
+        const circleplaneMash = new THREE.Mesh(planeGeom, Mt_map[0]);
+        circleplaneMash.rotation.x = -Math.PI / 2;
 
-        /* 加入城市場景模型 */
-        // gltf取得貼圖的方式 
-        m_city.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material.side = THREE.DoubleSide;
-                // console.log(child.material.side);
-            }
-        });
-        m_city.position.set(0, 1, 0);
-        this.scene.add(m_city);
+        /* 必須重製模型的旋轉量，才可以丟回去給物理計算 */
+        circleplaneMash.updateMatrix(); // 应用当前的变换到矩阵
+        circleplaneMash.geometry.applyMatrix4(circleplaneMash.matrix);
+        circleplaneMash.position.set(0, 0, 0); // 重置物体的位置、旋转和缩放
+        circleplaneMash.rotation.set(0, 0, 0);
+        circleplaneMash.scale.set(1, 1, 1);
+        circleplaneMash.updateMatrix(); // 更新物体的矩阵
+        this.scene.add(circleplaneMash);
 
-        /* 給城市場景模型加入凸包物理 */
-        const createCityCollider = this.physicsWorld.createScene(m_city);
-        this.co_city = createCityCollider;
+        /* 給地板加入物理 */
+        const createCircleplaneCollider = this.physicsWorld.createScene(circleplaneMash);
+        this.co_circlePlane = createCircleplaneCollider.Mycollider;
+
+        /* 創建轉動柱子模型 */
+        const rotateColumn = new THREE.Object3D();
+        const ColumnGeom = new THREE.BoxGeometry(4, 3, 20);
+        const ColumnMash = new THREE.Mesh(ColumnGeom, Mt_map[1]);
+        ColumnMash.position.set(0, 1.5, 10);
+        rotateColumn.add(ColumnMash);
+        this.scene.add(rotateColumn);
+        this.co_rotateColumn = rotateColumn;
+
+        /* 給轉動柱子加入物理 */
+        let { model, rigidBody, rigidBodyDesc } = this.physicsWorld.createRigidBody(rotateColumn, rotateColumn.position, 'kinematicPositionBased', 5);
+        this.co_rotateColumn_RGBody = rigidBody;
+        this.co_rotateColumn_RGDesc = rigidBodyDesc;
 
     }
-    createvehicle(m_carbody, m_carWheel) {
+
+    updateSceneAni() {
+        if (!this.co_rotateColumn || !this.co_rotateColumn_RGDesc) return;
+        this.co_rotateColumn.rotation.y += 0.001;
+        // console.log(this.co_rotateColumn.rotation.y);
+
+        // 将Three.js的Euler旋转转换为四元数
+        const quaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, this.co_rotateColumn.rotation.y, 0));
+        // 使用该四元数设置物理刚体的下一个运动学旋转
+        this.co_rotateColumn_RGBody.setNextKinematicRotation(quaternion);
+    }
+    createPlayer() {
         /* 汽車模型建立 + 控制邏輯 */
-        this.player = new Player(this, this.physicsWorld, m_carbody, m_carWheel, this.Input, this.camera);
+        this.player = new Player(this, this.physicsWorld, this.Input, this.camera);
         this.player.init();
     }
+
 }
 
 const app = new ThreeScene();
