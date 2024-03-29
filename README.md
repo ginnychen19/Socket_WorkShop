@@ -1,11 +1,10 @@
 #  跳跳的 Socket.IO 工作坊
 
-Work01 - 多人聊天室 <br>
+## Work01 - 多人聊天室 
 https://gotoo.co/demo/elizabeth/Frontend_Workshop/socket/work01/ <br>
 
 參考教學
 https://viboloveyou12.medium.com/%E7%94%A8-socket-io-%E6%89%93%E9%80%A0%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4-%E4%B8%8B-f7aabc21d3f2 <br>
-
 
 WebSocket 是一種網路通訊協議，而 Socket.IO 是一個函式庫 <br>
 Socket.IO 主要是好在，可以自動降級到其他傳輸方式! <br>
@@ -31,20 +30,6 @@ Client收到Server傳來的登入成功或失敗事件，執行相應處理，�
 Server收到請求後，廣播該訊息給所有連接的Client <br>
 Client收到Server傳來的訊息後，判斷用戶名稱是否為自己，對話顯示在相應位置 <br>
 
-### 注意
-socket.io需要處理跨域問題(如果客户端和服务器端不在同一个域上)，所以要在假後台裡用這個 <br> 
-<pre><code>var io = require('socket.io')(app, {
-    cors: {
-        origin: "我用run dev 時開的網址",  // 允许哪些 URL 可以访问资源
-        methods: ["GET", "POST"],  // 允许哪些 HTTP 方法访问资源
-        allowedHeaders: ["my-custom-header"],  // 允许哪些 HTTP 头部访问资源
-        credentials: true  // 是否允许发送 Cookie
-    }
-});</code></pre>
-如果是直接用原生的websocket，則可以不用處理cors <br> 
-原生 WebSocket 協定 (ws:// 和 wss://) 並未直接受 CORS 策略的限制，因為 WebSocket 不遵循同源策略（SOP）<br> 
-大多數情況下不強制要求 CORS 回應頭。 <br> 
-
 ### 加入Fly.io 後端部署平台
 https://fly.io/ <br>
 https://ithelp.ithome.com.tw/articles/10307847 <br>
@@ -68,13 +53,13 @@ https://ithelp.ithome.com.tw/articles/10307847 <br>
 
 ---
 
-Work02 - Three多人方塊 -no 物理 <br>
+## Work02 - Three多人方塊 -no 物理 
 https://gotoo.co/demo/elizabeth/Frontend_Workshop/socket/work02/ <br>
 
 使用express => npm i express
 使用時，因為express會設定要取用物件的路徑，所以我設定時，要符合我用parcel打包的路徑
 
-#### 主要交互的方式是這樣
+### 主要交互的方式是這樣
 每次有新客戶端開啟時，我們會在客戶端隨機產生一個方塊 <br> 
 當我們接受到伺服器產生給該客戶端的id時【id事件】 <br> 
 
@@ -96,16 +81,61 @@ https://gotoo.co/demo/elizabeth/Frontend_Workshop/socket/work02/ <br>
 然後，我們再通知客戶端有【removeClient事件】，要執行scene.remove這個動作。 <br> 
 如果不這樣做的話，物件就只會停止更新移動，但是客戶端還是會看到它，因為它不會消失。 <br> 
 
+
+### 請參考learn => Three.js-TypeScript-Boilerplate
+01. 首先先看他的開啟方式，他在開發模式下(npm run dev)，有使用到Node的concurrently套件，分別執行了三個指令，他分開指令的方式是這樣  \" <你的指令> \"
+-k："kill others on fail"，即如果其中一個命令失敗（即退出狀態非零），concurrently 將終止所有其他正在運行的命令。
+* "tsc -p ./src/server -w"：
+    - tsc：這是TypeScript的編譯器。
+    - -p ./src/server：這個參數告訴 tsc 使用位於 ./src/server 的 tsconfig.json 設定檔。
+    - -w：這意味著編譯器將在觀察模式下運行，也就是說，如果原始檔案發生變化，編譯器將重新編譯專案。
+
+* "nodemon ./dist/server/server.js"：
+    - nodemon：這是一個工具，用於在偵測到檔案變更時重新啟動Node.js應用程式。
+    - ./dist/server/server.js：這是 nodemon 將運行和監視的JavaScript檔案。
+
+* "webpack serve --config ./src/client/webpack.dev.js"：
+    - webpack：這是一個模組打包工具。
+    - serve：這個參數告訴webpack啟動一個開發伺服器，通常用於前端專案的熱重載。
+    - --config ./src/client/webpack.dev.js：這告訴webpack使用位於 ./src/client/webpack.dev.js 的設定檔。
+
+### 踩坑注意
+- this.socket = io('ws://localhost:3000');一但被加入，就表示客戶端已經呼喚過伺服器了，所以我如果把客戶端的connect事件放到很久之後才操作，那就可能造成伺服器想要傳資訊給我們，但是我們的客戶端卻一直沒有事件接收<br>
+this.socket = io('ws://localhost:3000');請和connect事件放在一起!
+
 ---
 
-Work03 - Three多人方塊 - 有物理 <br>
+## Work03 - Three多人方塊 - 有物理 
 https://gotoo.co/demo/elizabeth/Frontend_Workshop/socket/work03/ <br>
 
 
 
 ---
+## 踩坑注意
+01. 
+socket.io需要處理跨域問題(如果客户端和服务器端不在同一个域上)，所以要在假後台裡用這個 <br> 
+<pre><code>var io = require('socket.io')(app, {
+    cors: {
+        origin: "我用run dev 時開的網址",  // 允许哪些 URL 可以访问资源
+        methods: ["GET", "POST"],  // 允许哪些 HTTP 方法访问资源
+        allowedHeaders: ["my-custom-header"],  // 允许哪些 HTTP 头部访问资源
+        credentials: true  // 是否允许发送 Cookie
+    }
+});</code></pre>
+如果是直接用原生的websocket，則可以不用處理cors <br> 
+原生 WebSocket 協定 (ws:// 和 wss://) 並未直接受 CORS 策略的限制，因為 WebSocket 不遵循同源策略（SOP）<br> 
+大多數情況下不強制要求 CORS 回應頭。 <br> 
 
-#### 參考資料：
+02. 
+在示範的server中，Leaen中的伺服器案例有使用Express建立Server<br> 
+但我個人直接使用 http.createServer()<br> 
+Express提供了路由、中介軟體等功能(express.static)<br> 
+所以他可以自由定義資料來源的路徑<br> 
+也可以在請求和回應之間插入處理邏輯，可實現各種功能（如日誌記錄、請求體解析、身份驗證等）<br> 
+
+---
+
+## 參考資料：
 
 socket.io套件 <br>
 https://socket.io/ <br>

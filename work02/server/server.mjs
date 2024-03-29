@@ -2,18 +2,19 @@
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
-const port = 3000;
 class App {
-    constructor(port) {
+    constructor() {
         /* A.伺服器建立 */
-        this.port = port;
-        
+        this.port = 3000;
+
         this.server = createServer();
         this.io = new SocketIOServer(this.server, {
             cors: {
-                origin: "http://localhost:1234",
-                methods: ["GET", "POST"],
-                allowedHeaders: ["my-custom-header"],
+                origin: ["https://gotoo.co",
+                    "http://localhost:1234",
+                    "http://127.0.0.1:5500",],  // 允许哪些 URL 可以访问资源
+                methods: ["GET", "POST"],  // 允许哪些 HTTP 方法访问资源
+                allowedHeaders: ["my-custom-header"],  // 允许哪些 HTTP 头部访问资源
                 credentials: true  // 是否允许发送 Cookie
             }
         });
@@ -33,27 +34,30 @@ class App {
             console.log(`有用戶加入拉: ${socket.id}`);
             socket.emit("connection-successful", "連接成功");
             //C-2.把使用者的UUid加入到clients物件中
-            this.clients[socket.id] = {};
+            this.clients[socket.id] = {
+                pos: null,
+                rot: null,
+                size: null,
+                color: null,
+                events: [], // 直接將當前事件加入
+            };
 
             //C-3.設定伺服器端有一個 id 事件，發送給客戶端當前的UUid
-            socket.emit('getId', socket.id);
-            
+            socket.emit('getId', socket.id, this.clients);
+
             //C-4.當客戶端斷掉連線時
             socket.on('disconnect', () => {
                 console.log('有用戶離開: ' + socket.id);
                 //C-5.把使用者的UUid從clients物件中刪除
-                if (this.clients && this.clients[socket.id]) {
+                if (this.clients[socket.id]) {
                     console.log('刪除' + socket.id); //終端會告訴我們刪除了誰
                     delete this.clients[socket.id];
                     //給客戶端發送被刪除者的socket.id
-                    // this.io.emit('removeClient', socket.id);
+                    this.io.emit('removeClient', socket.id);
                 }
             });
 
-            socket.on('iamfromClient', (message) => {
-                console.log(message);
-            })
-            // //C-6.設定伺服器端有一個 update 事件
+            //C-6.設定伺服器端有一個 update 事件
             // socket.on('update', (message) => {
             //     if (this.clients[socket.id]) {
             //         this.clients[socket.id].t = message.t; //客戶端的時間戳記
@@ -61,6 +65,31 @@ class App {
             //         this.clients[socket.id].r = message.r; //rotation
             //     }
             // });
+
+            socket.on('giveSetting', (id, myValue) => {
+                let client = this.clients[id];
+                if (client) {
+                    // 更新客户端的信息
+                    client.size = Number(myValue.size);
+                    client.pos = {
+                        x: Number(myValue.posX),
+                        y: Number(myValue.posY),
+                        z: Number(myValue.posZ)
+                    };
+                    client.rot = {
+                        x: Number(myValue.rotX),
+                        y: Number(myValue.rotY),
+                        z: Number(myValue.rotZ)
+                    };
+                    client.color = `#${myValue.color}`; // myValue.color;
+
+                    // 将更新后的客户端信息保存回{}
+                    this.clients[id] = client;
+                    // 然后将这个更新后的客户信息广播给所有客户端
+                    this.io.emit('updateClients', this.clients);
+                }
+
+            });
         });
     }
     updateClients() {
@@ -74,4 +103,4 @@ class App {
         });
     }
 }
-new App(port).Start();
+new App().Start();

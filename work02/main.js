@@ -25,8 +25,8 @@ class ThreeScene {
         this.LD = new Loadings(this);
 
         /* 加入socket */
-        this.socket = io('ws://localhost:3000');
-        console.log(this.socket);
+        this.clients;
+        this.socket;
         this.myId = '';
         this.timestamp = 0;
         this.clientCubes = {};// 儲存所有用戶的方塊
@@ -153,48 +153,70 @@ class ThreeScene {
     }
 
     /* socket */
-
-    /* "dev": "concurrently \"node ./work02/server/server.mjs\" \"npx parcel ./work02/index.html\"", */
     createSocket() {
-        this.socket.emit('iamfromClient', "我是客戶端");
-
+        this.socket = io('ws://localhost:3000');
         // D-1.socket 收到 伺服器的 connect 事件 (只是客戶端用來確認自己是否連上socket)
-        this.socket.on("connection-successful", function (message) {
-            console.log(message);
+        this.socket.on("connect", function () {
+            console.log("伺服器連接成功!");
         });
         // D-2.socket 收到 伺服器的 disconnect 事件 (只是客戶端用來確認自己是否斷線，除非我自己關掉Server，不然應該不會觸發)
         this.socket.on('disconnect', function (message) {
             console.log('連接失敗 ' + message);
         });
-        console.log(this.socket);
         // D-3.socket 收到 伺服器的 id 事件，生成第一個方塊(自己)
-        this.socket.on('getId', (elem1) => {
-            console.log(elem1);
-            this.createOrUpdateBlock(id);
-            // this.socket.emit('update', {
-            //     t: Date.now(),
-            //     p: myObject3D.position,
-            //     r: myObject3D.rotation,
-            // });
+        this.socket.on('getId', (id, AllPlayers) => {
+            console.log("這位玩家是:", id);
+            console.log("伺服器的玩家資料:", AllPlayers);
+            //D-4.socket id後，開始製作方塊
+            let myValue = this.createMyBoxValue();
+            this.socket.emit("giveSetting", id, myValue);
         });
-
-        this.socket.on('clients', (elem1) => {
-            console.log(elem1);
+        // D-5.socket 收到 removeClient 也就是有玩家退出的事件
+        this.socket.on('removeClient', (id) => {
+            console.log("有用戶離開:", id);
+            delete this.clients[id];
+            // 刪除實際方塊玩家的邏輯
+            this.scene.remove(this.clientCubes[id]);
+        })
+        /* 把所有伺服器的玩家一起更新進來 */
+        this.socket.on('updateClients', (allClients) => {
+            this.clients = allClients;
+            console.log("客戶端收到的總人數資料:", this.clients);
+            //D-4.伺服器收完資料後後，開始製作方塊
+            this.createOrUpdateBlock(this.clients);
         });
-
     }
-    createOrUpdateBlock({ id, color, rotation, position }) {
-        if (!this.clientCubes[id]) {
-            // 如果方块不存在，则创建
-            const geometry = new THREE.BoxGeometry(5, 5, 5);
-            const material = new THREE.MeshBasicMaterial({ color: color });
-            this.clientCubes[id] = new THREE.Mesh(geometry, material);
-            this.scene.add(this.clientCubes[id]);
-        }
+    createMyBoxValue() { /* 建立隨機數值 */
+        // Generate a random size from 1 to 5
+        const size = 1 + Math.floor(Math.random() * 5);
+        // Generate a random x position from -10 to 10
+        const posX = Math.floor((Math.random() * 2 - 1) * 10);
+        // Generate a random y position from 0 to 15
+        const posY = Math.floor(0 + Math.random() * 16);
+        const posZ = Math.floor((Math.random() * 2 - 1) * 10);
+        const color = Math.floor(Math.random() * 0x100000).toString(16).padStart(6, '0');
 
-        // 更新方块的位置和旋转
-        block.position.set(position.x, position.y, position.z);
-        block.rotation.set(rotation, rotation, rotation);
+        const rotX = Math.floor(Math.random() * 360) * Math.PI / 180;
+        const rotY = Math.floor(Math.random() * 360) * Math.PI / 180;
+        const rotZ = Math.floor(Math.random() * 360) * Math.PI / 180;
+        return { size, posX, posY, posZ, color, rotX, rotY, rotZ };
+    }
+    createOrUpdateBlock(clients) {
+        Object.entries(clients).forEach(([id, client]) => { // 這裡會跑每一個client
+            if (!(id in this.clientCubes)) { // 如果方块不存在，则创建
+                const geometry = new THREE.BoxGeometry(client.size, client.size, client.size);
+                const material = new THREE.MeshBasicMaterial({ color: client.color });
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.set(client.pos.x, client.pos.y, client.pos.z);
+                cube.rotation.set(client.rot.x, client.rot.y, client.rot.z);
+                this.scene.add(cube);
+                this.clientCubes[id] = cube;
+            } else { // 如果方块存在，更新方块的位置和旋转
+                this.clientCubes[id].position.set(client.pos.x, client.pos.y, client.pos.z);
+                this.clientCubes[id].rotation.set(client.rot.x, client.rot.y, client.rot.z);
+            }
+        });
+        console.log([this.clientCubes]);
     }
     removeBlock(userId) {
         const block = this.blocks[userId];

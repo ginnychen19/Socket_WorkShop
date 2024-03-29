@@ -17,6 +17,7 @@
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "events": "^3.3.0",
+    "nodemon": "^3.1.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
@@ -31,7 +32,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "parcel ./work02/index.html",
-    "build": "parcel build ./work02/index.html"
+    "build": "parcel build ./work02/index.html",
+    "server": "nodemon ./work02/server/server.mjs"
   },
   "keywords": [],
   "author": "",
