@@ -14,7 +14,36 @@
     <div id="css3d"></div>
     <div id="webgl"></div>
   </div>
-
+  <div class="UI">
+    <div class="OpenHouse hidden">
+      <h2>房號 #<span id="PutroomID">000000</span></h2>
+      <ul>
+        <li><span>名字</span><span>狀態</span></li>
+      </ul>
+      <div class="btns">
+        <button class="return">↺ RERURN ↺</button>
+        <button class="startGame">✦ START ✦</button>
+      </div>
+    </div>
+    <div class="Login">
+      <div class="LoginBox">
+        <h1>跳跳風火輪</h1>
+        <section class="textArea">
+          <div class="textbox">
+            <h4>★ 取個名吧</h4>
+            <input id="userName" type="text">
+          </div>
+          <div class="textbox">
+            <h4>✦ 輸入房號</h4>
+            <p>( 不輸的話就是開新房 )</p>
+            <p>( 輸入同樣的就是加入該房間 )</p>
+            <input id="roomID" type="text">
+          </div>
+          <button class="joinGame">✦ 加入遊戲 ✦</button>
+        </section>
+      </div>
+    </div>
+  </div>
   <script type="module" src="./main.js"></script>
 </body>
 

@@ -7,6 +7,10 @@ import { Loadings } from './loading.js';
 import { InputHandler } from './input.js';
 import { Camera } from './camera.js';
 import { Player } from './player.js';
+import { UiControl } from './ui.js';
+import { Client } from './client.js';
+
+import { io } from 'socket.io-client';//npm i --save-dev socket.io-client
 
 class ThreeScene {
     constructor() {
@@ -21,9 +25,11 @@ class ThreeScene {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.25;
 
-        /* 物理世界必須優先啟動 */
-        this.physicsWorld = new PhysicsWorld(this);
-        this.LD = new Loadings(this);
+       
+        this.physicsWorld = new PhysicsWorld(this);  /* 物理世界必須優先啟動 */
+        this.LD = new Loadings(this);  /* 資源載入 */
+        this.socketClient = new Client(this); /* socket連線 */
+        this.UiControl = new UiControl(this); /* UI控制 */
 
         /* 鍵盤與手指移動輸入控制 */
         this.Input = new InputHandler(this);
@@ -36,7 +42,7 @@ class ThreeScene {
     async init() {
         await this.physicsWorld.init();
         //要把加入碰撞場景，加入鍵盤監聽 ，加入汽車 Vehicle 這個檔在完成this.LD.init()才可以加入
-        await this.LD.init(this.createBasicScene.bind(this), this.createPlayer.bind(this));
+        await this.LD.init();
 
         this.createScene();
         this.creatSkybox();
@@ -44,6 +50,7 @@ class ThreeScene {
         this.createRenderer();
 
         this.Camera.init();
+        this.UiControl.init();
 
         this.animate(); // 放在這裡是因為必須等到模型Loading結束
     }
@@ -156,6 +163,7 @@ class ThreeScene {
         rotateColumn.add(ColumnMash);
         this.scene.add(rotateColumn);
         this.co_rotateColumn = rotateColumn;
+        
 
         /* 給轉動柱子加入物理 */
         let { model, rigidBody, rigidBodyDesc } = this.physicsWorld.createRigidBody(rotateColumn, rotateColumn.position, 'kinematicPositionBased', 5);

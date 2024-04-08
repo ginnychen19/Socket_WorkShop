@@ -119,7 +119,6 @@ class ThreeScene {
         });
     }
 
-
     /* 測試加入物件 */
     createObj(m_city) {
         const that = this;

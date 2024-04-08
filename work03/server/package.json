@@ -1,0 +1,15 @@
+{
+  "name": "socket-example01",
+  "version": "0.0.1",
+  "description": "socket.io app",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.mjs",
+    "dev":"npx nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

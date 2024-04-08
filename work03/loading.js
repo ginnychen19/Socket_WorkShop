@@ -31,7 +31,7 @@ export class Loadings {
        p_物件名稱 => 表示粒子貼圖類資源
     */
 
-    async init(fun_createBasicScene, fun_createPlayer) {
+    async init() {
         try {
             const m_city = await Promise.all([
                 this.loadingGLTF3DModel('./assest/models/city.glb', 'city')
@@ -44,8 +44,6 @@ export class Loadings {
             ]);
 
             // 所有資源載入完成後執行後續操作
-            fun_createBasicScene();
-            fun_createPlayer();
         } catch (error) {
             console.error("Error loading resources:", error);
         }

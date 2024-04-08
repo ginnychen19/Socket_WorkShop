@@ -1,93 +1,281 @@
 :root {
-    --color01: #F7F8F8;
-    --color02: #9FA0A0;
-    --color03: #525152;
-    --Green: #005253;
-    --YWhite: #E6E1CC;
-    --River: #bffff5;
-    --GreenRiver: #63AEA8;
-    --DGreenRiver: #266f72;
-  
-    --Green02: #628e59;
-    --Green03: #A3CF78;
-    --Green04: #87c379;
-  
-    --BG_LYellow: #f0da99;
-    --BG_LOrange: #F3D1B2;
-    --BG_MOrange: #f7bc88;
-  
-    --Brown01: #5c3a31;
-    --Brown02: #835B36;
-    --Brown03: #BB8058;
-  
-    --Brown04_BE: #b79779;
-    --Brown05_BEtxt: #876464;
-  
-  
-    --BTN_Red: #e3344b;
-    --BTN_Green: #337e47;
-    --BTN_Yellow: #f39800;
-    --BTN_Blue: #0061f3;
-  
-    --pLabel: 80px;
-    --pBTitle: 58px;
-    --pMTitle: 40px;
-    --pSTitle: 28px;
-    --pContent: 18px;
-    --pSContent: 14px;
-  
-    --gameUIwidth: 900;
-    --gameUIheight: 500;
-  
-    --Zindex_canvas3D: 0;
-    --Zindex_allUI: 1;
-    --Zindex_loadingUI: 10;
-    --Zindex_mazuLoading: 2;
-    --Zindex_whiteBall: 1;
-    --Zindex_controlDom: 0;
-    --Zindex_BasicInterface: 2;
-    --Zindex_joystick: 1;
+  --colorW: #F7F8F8;
+  --colorGL: #9FA0A0;
+  --colorGD: #525152;
+
+  --color-p: #CD7F17;
+  --color-border: #CFAE93;
+  --color-BG01: #FFF3E5;
+  --color-BG02: #FFE0C4;
+
+  --BTN_Red: #e3344b;
+  --BTN_Green: #337e47;
+  --BTN_Yellow: #FEB44B;
+  --BTN_Yellow_hover: #ff9500;
+  --BTN_Blue: #0061f3;
+
+  --p-4rem: 64px;
+  --p-3rem: 48px;
+  --p-2rem: 32px;
+  --p-15rem: 24px;
+  --p-1rem: 16px;
+
+  --borderRadius: 20px;
+}
+
+ul>li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  color: var(--color-p);
+  margin: 0;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: var(--p-4rem);
+}
+
+h2 {
+  font-size: var(--p-3rem);
+}
+
+h3 {
+  font-size: var(--p-2rem);
+}
+
+h4 {
+  font-size: var(--p-15rem);
+}
+
+span {
+  font-size: var(--p-1rem);
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  align-self: center;
+
+}
+
+#container {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+#webgl,
+#css3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  opacity: 1;
+}
+
+/* 開房介面 */
+.UI {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: var(--color-BG02);
+  background-image: radial-gradient(var(--color-border) 2px, transparent 2px), radial-gradient(var(--color-border) 2px, transparent 1.5px);
+  background-size: calc(20 * 1.5px) calc(20 * 1.5px);
+  background-position: 0 0, calc(10 * 1.5px) calc(10 * 1.5px);
+}
+
+.OpenHouse {
+  width: 1000px;
+  height: 600px;
+  box-sizing: border-box;
+  padding: 30px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+
+  background-color: var(--color-BG01);
+  border-radius: 20px;
+  border: 5px solid var(--color-border);
+}
+
+.OpenHouse>h2 {
+  width: 100%;
+  flex: 1;
+  border-bottom:3px solid var(--color-border);
+}
+#PutroomID {
+  font-size: var(--p-3rem);
+}
+.OpenHouse>ul {
+  list-style-type: none;
+  box-sizing: border-box;
+  width: 100%;
+  flex: 8;
+  padding: 0 20px 0 20px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    width: 10px;
   }
-  
-  ul>li,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p {
-    margin: 0;
-    font-weight: 600;
+  &::-webkit-scrollbar-track {
+    background: var(--colorW);
   }
-  
-  .hidden {
-    display: none !important;
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 10px;
   }
-  
-  body {
-    margin: 0;
-    padding: 0;
-  
-    display: flex;
-    justify-content: center;
-    align-self: center;
-  
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--BTN_Yellow_hover);
   }
-  
-  #container {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-  }
-  
-  #webgl,
-  #css3d {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    opacity: 1;
-  }
+}
+
+.OpenHouse>ul>li {
+  display: flex;
+  justify-content: space-between;
+}
+
+li>span {
+  font-size: var(--p-15rem);
+}
+
+.OpenHouse>.btns {
+  width: 100%;
+  height: fit-content;
+  box-sizing: border-box;
+  flex: 1;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btns>.return {
+  width: 45%;
+  height: 100%;
+  background-color: var(--BTN_Red);
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.btns>.startGame {
+  width: 45%;
+  height: 100%;
+  background-color: var(--BTN_Yellow);
+  border: 1px solid transparent;
+
+  border-radius: 10px;
+}
+
+.Login {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.LoginBox {
+  box-sizing: border-box;
+  width: 400px;
+  height: 600px;
+  background-color: var(--color-BG01);
+  padding: 30px;
+
+  border-radius: 20px;
+  border: 5px solid var(--color-border);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.LoginBox>h1 {
+  letter-spacing: 3px;
+  margin-right: -6px;
+}
+
+.textArea {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.textbox {
+  box-sizing: border-box;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.textbox>input {
+  box-sizing: border-box;
+  width: 99%;
+  border-radius: 8px;
+  padding: 3px 6px;
+  border: 3px solid var(--color-border);
+  color: var(--color-p);
+}
+
+.textbox>input[disabled] {
+  background: #fff;
+  opacity: 1;
+  color: black;
+}
+
+button {
+  color: var(--color-BG01);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  width: 100%;
+
+  font-size: var(--p-15rem);
+}
+
+.joinGame {
+  background-color: var(--BTN_Yellow);
+  border: 1px solid transparent;
+}
+
+.joinGame:hover {
+  cursor: pointer;
+  background-color: var(--BTN_Yellow_hover);
+  box-shadow: 0 0 30px 5px var(--BTN_Yellow);
+}

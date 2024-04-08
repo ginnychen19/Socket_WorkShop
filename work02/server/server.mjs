@@ -6,7 +6,6 @@ class App {
     constructor() {
         /* A.伺服器建立 */
         this.port = 3000;
-
         this.server = createServer();
         this.io = new SocketIOServer(this.server, {
             cors: {
@@ -25,14 +24,13 @@ class App {
         this.clients = {};
         /* C.當伺服器連線上時 */
         this.initServer();
-        /* D.因為只要有人移動，伺服器端就要一直通知有數值被更新了，讓客戶端一直畫新位置 */
-        // this.updateClients();
+
     }
     initServer() {
         this.io.on('connection', (socket) => {
             //C-1.每次有新使用者時，都會觸發 socket.id => 會自動生成一個uuid
             console.log(`有用戶加入拉: ${socket.id}`);
-            socket.emit("connection-successful", "連接成功");
+
             //C-2.把使用者的UUid加入到clients物件中
             this.clients[socket.id] = {
                 pos: null,
@@ -57,19 +55,10 @@ class App {
                 }
             });
 
-            //C-6.設定伺服器端有一個 update 事件
-            // socket.on('update', (message) => {
-            //     if (this.clients[socket.id]) {
-            //         this.clients[socket.id].t = message.t; //客戶端的時間戳記
-            //         this.clients[socket.id].p = message.p; //position
-            //         this.clients[socket.id].r = message.r; //rotation
-            //     }
-            // });
-
+            //C-6.伺服器收到客戶端給的 giveSetting 事件時，伺服器會把資料傳回來整理好，再發回給客戶端
             socket.on('giveSetting', (id, myValue) => {
                 let client = this.clients[id];
                 if (client) {
-                    // 更新客户端的信息
                     client.size = Number(myValue.size);
                     client.pos = {
                         x: Number(myValue.posX),
@@ -81,7 +70,7 @@ class App {
                         y: Number(myValue.rotY),
                         z: Number(myValue.rotZ)
                     };
-                    client.color = `#${myValue.color}`; // myValue.color;
+                    client.color = `#${myValue.color}`;
 
                     // 将更新后的客户端信息保存回{}
                     this.clients[id] = client;
@@ -89,6 +78,14 @@ class App {
                     this.io.emit('updateClients', this.clients);
                 }
 
+                //C-7.設定伺服器端有一個 update 事件
+                // socket.on('update', (message) => {
+                //     if (this.clients[socket.id]) {
+                //         this.clients[socket.id].t = message.t; //客戶端的時間戳記
+                //         this.clients[socket.id].p = message.p; //position
+                //         this.clients[socket.id].r = message.r; //rotation
+                //     }
+                // });
             });
         });
     }
