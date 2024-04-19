@@ -31,9 +31,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel ./work03/index.html",
-    "build": "parcel build ./work03/index.html",
-    "server": "nodemon ./work03/server/server.mjs"
+    "dev": "parcel ./work04/index.html",
+    "build": "parcel build ./work04/index.html",
+    "server": "nodemon ./work04/server/server.mjs"
   },
   "keywords": [],
   "author": "",

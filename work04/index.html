@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./main.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.js"
+        integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <table>
+        <tr>
+            <td>UserName：</td>
+            <td><input type="text" id="userName" required></td>
+        </tr>
+        <tr>
+            <td>RoomName：</td>
+            <td><input type="text" id="RoomName" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="button" value="加入" id="join"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div id="myID"></div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="roomUsers">
+    </div>
+
+    <dialog>
+        <button id="closeDialog">X</button>    
+        <p id="remindText">Test</p>
+    </dialog>
+
+    <script type="module" src="./client.js"></script>
+</body>
+
+</html>
+
+<!-- <div class="room">
+    <h2>房間-<span class="roomName">0000</span></h2>
+    <div class="userList">
+        <p class="player">玩家一</p>
+    </div>
+</div> -->

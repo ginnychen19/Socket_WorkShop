@@ -6,10 +6,10 @@ export const keyboardState = {
     jump: false      //跳
 };
 export const touchState = {
-    front: false,    
-    back: false,        
-    left: false,     
-    right: false,   
+    front: false,
+    back: false,
+    left: false,
+    right: false,
     jump: false //緊急煞車
 };
 
@@ -38,7 +38,8 @@ export class InputHandler {
         this.touchStart = { x: 0, y: 0 }; //joystick可使用 (手機端移動)
         this.touching = false;
         this.touchThreshold = 30;    //觸摸門檻
-
+    }
+    startAddEventListener() {
         document.addEventListener('keydown', (event) => this.updateKey(event, true), false);
         document.addEventListener('keyup', (event) => this.updateKey(event, false), false);
 
@@ -53,7 +54,6 @@ export class InputHandler {
     isPressed(keyArray) {
         return keyArray.some(key => this.keysPressed[key]);
     }
-
     updateKeyboardState() {/* 從這裡去更新 我們現在要執行那些動作 */
         this.keyboardState.front = this.isPressed(W);               //加速
         this.keyboardState.back = this.isPressed(S);               //煞車 or 往後?

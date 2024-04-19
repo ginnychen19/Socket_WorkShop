@@ -22,6 +22,8 @@ class App {
         // 初始化一個物件來追蹤所有連線的客戶端。 每個客戶端連線都將以其 socket.id 作為鍵儲存在這個物件中。
         // 每個鍵都會對應到時間戳記、位置、旋轉量等數據...
         this.clients = {};
+
+        this.Room
         /* C.當伺服器連線上時 */
         this.initServer();
 
