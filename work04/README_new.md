@@ -9,10 +9,10 @@
 - **this.io.sockets.adapter.sids.get(socketId):** 查看某個客戶端加入哪個房間 
 
 
-##### 【注意】engine引擎层和 Socket.IO 层的差异：
+### 【注意】engine引擎层和 Socket.IO 层的差异：
 engine.io 是 Socket.IO 的底层，处理低级的传输细节（如 WebSockets 和轮询）。this.io.engine.clients 直接从这个层面上提供信息，可能包含那些还没完全建立或已断开但尚未清除的连接。
 
-##### 【注意】在click事件中添加on事件監聽的話可能會被重複綁定
+### 【注意】在click事件中添加on事件監聽的話可能會被重複綁定
 this.socket.on("事件");是有可能被重複綁定的!
 所以如果發生同一內容卻多次同時被呼叫
 可能是監聽器被重複設定了太多個! 有兩種方法
@@ -23,7 +23,7 @@ this.socket.off("Room-announcement");
 // 02.在点击事件内部使用.once()监听器
 this.socket.once("Room-announcement")</code></pre>
 
-##### 【注意】在 Socket.IO 中，adapter 负责管理以下内容：
+### 【注意】在 Socket.IO 中，adapter 负责管理以下内容：
 * ***房间（Rooms）：***
   它维护一个房间列表，每个房间可能包含多个 socket 实例（客户端连接）当一个 socket 加入或离开房间时，adapter 更新其内部的房间状态。
 
@@ -33,7 +33,7 @@ this.socket.once("Room-announcement")</code></pre>
 * ***消息广播：***
   adapter 负责广播消息给整个命名空间、特定房间或特定的一组 sockets。这包括发送事件、广播数据等。
 
-##### 【注意】資料紀錄的形式有很多是用Map或是Set來實現的
+### 【注意】資料紀錄的形式有很多是用Map或是Set來實現的
 <pre><code>rooms: Map(4) {
     'a6UPBBHQOrIQZVetAAAB' => Set(1) { 'a6UPBBHQOrIQZVetAAAB' },
     '0001' => Set(1) { 'a6UPBBHQOrIQZVetAAAB' },
@@ -49,17 +49,31 @@ this.socket.once("Room-announcement")</code></pre>
 取得所有UUID，因為它們是作為鍵儲存的
 <pre><code>Array.from(socketsMap.keys())</pre></code>
 
-##### 【注意】在ON事件中呼叫出的socket.id和在外層呼叫的socket.id是不一樣的??
-詳情可以去比較 server.mjs 的 on【giveData事件】裡的  console.log(socket.id);、console.log(this.socket.id);
-
-
-
+### 【注意】在ON事件中呼叫出的socket.id和在外層呼叫的socket.id是不一樣的??
+必須注意，實際上，當玩家開啟網頁時，Socket會記錄id和room名稱的資訊，所以其他的內容，例如我所需要的玩家名稱、形狀、顏色、大小、位置... <br>
+這些需要在玩家INIT時一併送出給socket紀錄。
 
 ---
 
 ## 完整互動邏輯
+1. **初始化**
+  當Client進入時，Server會先執行檢查當前是否有已經存在的房間`this.constructRoomsList();`，當前使用者一個UUID，還有產生使用者的基礎數值。<br>
+  Server傳送`onInitSetME事件`給`該`Client => Client則會在前端顯示自己的ID <br>
+  Server傳送`onInit事件`給`所有`Client => 使用者一進入，會先取得自己當前的`UUID`、`已存在的房間`、`客戶端名單`，`this.checkRoomList('init')`則會加入相應的UI <br>
 
-使用者一進入會先取得自己當前的UUID
+2. **點擊加入房間**
+   在取得使用者的`userName`、`roomName`後，`this.ifUserJoinSomeRoom()`會先檢查是否目前UI上已經有存在加入同房間的狀態 <br>
+   - 有 => <br> `dialogFuntion.openDialog()`會通知警告訊息。
+   - 沒有 => <br> Client會傳送`join-room事件`,並更新Client的使用者名單 : Server會`socket.join(roomName);`、更新userList名稱，更新roomList名單，同時傳送給`所有`Client`Room-announcement事件`，當前加入的用戶的`uuid`、`使用者名稱`、`房間名`、`最新的房間清單`。 <br>
+   當Client接收到`Room-announcement事件`後，則會使用`this.checkRoomList('uppdate')`
+3. **this.checkRoomList(type, data)房間的更新事件**
+   - **init事件:**
+     - 因為只要有使用者加入，每個客戶端都會跑一次，所以我們檢查當前介面是否已經有存在，有表示這個用戶端是
+       直接加入所有房間，
+   - **init事件:**
+   
+5. **當有使用者離開時**
+
 
 在按下加入房間按鈕時，會先將房間名稱發送給伺服器，呼叫【join-Room事件】
 socket.join(RoomName);
