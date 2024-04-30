@@ -110,6 +110,32 @@ this.socket = io('ws://localhost:3000');請和connect事件放在一起!
 ## Work03 - Three多人方塊 - 有物理 
 https://gotoo.co/demo/elizabeth/Frontend_Workshop/socket/work03/ <br>
 
+### 資料收取的方式
+1.  Client (可以考慮指整理出同一個room的名單)
+    <pre><code>this.clientList = { 
+        'uuid01':{  id: 'uuid01', 
+                    userName: 'user01',
+                    playerState: 'srting', 
+                    setting: {...} 
+                },
+    };
+    this.roomList = {
+        "roomName01": ["uuid01",...],...
+        };
+    this.MyRoomMates = [ 'uuid01', 'uuid02', 'uuid03' ];</code></pre>
+2.  Server (要收到所有人的資訊)
+    -   playerState => init(初始化) | prepare(準備中) | ready(準備好) | idle(禁止) | walk(走) | run(跑) | jump(跳) | die(死) <br>
+    <pre><code>this.clientList[socketId] = { 
+        id: socketId,
+        userName: '',
+        playerState: 'srting',
+        setting: {
+            color: data.color,
+            size: data.size,
+            pos: { x: data.posX, y: data.posY, z: data.posZ },
+            rot: { x: data.rotX, y: data.rotY, z: data.rotZ }
+        }
+    }</code></pre>
 
 
 ---

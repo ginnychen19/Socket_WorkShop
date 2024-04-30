@@ -68,7 +68,6 @@ class App {
                         }
                     }
                 }
-                // this.io.emit('leaveRoom', socket.id, this.convertRoomsList(this.roomsList), this.clients);
                 console.log(this.clients);
                 console.log(this.roomsList);
             });
@@ -91,44 +90,7 @@ class App {
 
             socket.on('leave-room', (roomName) => {
                 socket.leave(roomName);
-                // 如果房间没有其他用户，可以考虑从列表中移除
-                // 这需要一些额外的逻辑来检查房间内是否还有用户
-                // if (/* room has no more users */) {
-                //     roomsList.delete(roomName);
-                // }
             });
-            //伺服器收到客戶端給的 giveSetting 事件時，伺服器會把資料傳回來整理好，再發回給客戶端
-            // this.socket.on('giveSetting', (id, myValue) => {
-            //     let client = this.clients[id];
-            //     if (client) {
-            //         client.size = Number(myValue.size);
-            //         client.pos = {
-            //             x: Number(myValue.posX),
-            //             y: Number(myValue.posY),
-            //             z: Number(myValue.posZ)
-            //         };
-            //         client.rot = {
-            //             x: Number(myValue.rotX),
-            //             y: Number(myValue.rotY),
-            //             z: Number(myValue.rotZ)
-            //         };
-            //         client.color = `#${myValue.color}`;
-
-            //         // 将更新后的客户端信息保存回{}
-            //         this.clients[id] = client;
-            //         // 然后将这个更新后的客户信息广播给所有客户端
-            //         this.io.emit('updateClients', this.clients);
-            //     }
-
-            //     //C-7.設定伺服器端有一個 update 事件
-            //     // this.socket.on('update', (message) => {
-            //     //     if (this.clients[this.socket.id]) {
-            //     //         this.clients[this.socket.id].t = message.t; //客戶端的時間戳記
-            //     //         this.clients[this.socket.id].p = message.p; //position
-            //     //         this.clients[this.socket.id].r = message.r; //rotation
-            //     //     }
-            //     // });
-            // });
         });
     }
 

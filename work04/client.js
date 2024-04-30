@@ -3,9 +3,9 @@ import { io } from 'socket.io-client';
 export class Client {
     constructor(main) {
         this.main = main;
+        this.socket = io('ws://localhost:8080');
 
         this.clients = {};  //所有的客戶端
-        this.socket = io('ws://localhost:8080');
         this.roomsList = {} //當前的房間，會一直和server端同步
 
         this.socketInit();
@@ -19,7 +19,6 @@ export class Client {
             })
             this.socket.on('onInit', (id, roomsList, clientList) => {
                 console.log("有新用戶加入拉" + id);
-
                 this.roomsList = roomsList;
                 this.clients = clientList;
                 if (Object.keys(roomsList).length > 0) { this.checkRoomList("init", { roomsList }); }
@@ -55,18 +54,16 @@ export class Client {
                 this.clients[this.socket.id].userName = userName;
             }
 
-            this.socket.off("Room-announcement"); //在click事件中添加on事件監聽的話可能會被重複綁定
+            this.socket.off("Room-announcement"); //在click事件中添加on事件監聽的話可能會被重複綁定!!
             this.socket.on("Room-announcement", (id, userName, roomName, roomsList) => {
                 this.checkRoomList("update", { id, userName, roomName, roomsList });
-                this.roomsList = roomsList; // 都做完了在更新this.roomsList的資料 
-                console.log(id + "加入房間(Room-announcement)，最新的房間列表 ⤵", this.roomsList);
+                this.roomsList = roomsList;  
+                // console.log(id + "加入房間(Room-announcement)，最新的房間列表 ⤵", this.roomsList);
             })
         })
     }
 
     checkRoomList(type, data) { //有新的人加入連線時都會執行一次
-        console.log("【需要checkRoomList】,type:", type);
-
         switch (type) {
             case "init":
                 if ($(".roomName").length > 0) { console.log("舊客戶端，不需要做任何更動"); return; }
@@ -122,7 +119,7 @@ export class Client {
         })
         return Boolean;
     };
-    deletRoom(id, room, needRemoveRoom) { //某種程度上我感覺最好還是全部重畫，因為名字有可能可以一樣
+    deletRoom(id, room, needRemoveRoom) { //某種程度上我感覺最好還是全部重渲染，因為名字有可能可以一樣
         console.log(this.clients);
         let userName = this.clients[id].userName;
         if(needRemoveRoom){
@@ -151,11 +148,6 @@ export class Client {
             }
         }
     }
-    createSocket() {
-    }
-    updateSocket() {
-    }
-
 }
 
 const client = new Client();

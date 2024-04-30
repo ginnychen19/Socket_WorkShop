@@ -3,82 +3,153 @@ import { io } from 'socket.io-client';//npm i --save-dev socket.io-client
 export class Client {
     constructor(main) {
         this.main = main;
+        /* 只會收和自己同一房間的 */
+        this.MyRoomMates = []; //放ID
+        this.MyMatesList = {}; //放詳細資訊
+
         this.socket = io('ws://localhost:3000');
         this.socket.on("connect", () => {
             console.log("connected");
         })
-        this.socket.on("disconnect", () => {
-            console.log("disconnected");
-        })
+
+        this.createSocket();
     }
     createSocket() {
-        // D-3.socket 收到 伺服器的 id 事件，生成第一個方塊(自己)
-        this.socket.on('getId', (id, AllPlayers) => {
-            console.log("這位玩家是:", id);
-            console.log("伺服器的玩家資料:", AllPlayers);
-            //D-4.socket id後，開始製作方塊
-            let myValue = this.createMyBoxValue();
-            this.socket.emit("giveSetting", id, myValue);
-        });
-        // D-5.socket 收到 removeClient 也就是有玩家退出的事件
-        this.socket.on('removeClient', (id) => {
-            console.log("有用戶離開:", id);
-            delete this.clients[id];
-            // 刪除實際方塊玩家的邏輯
-            this.scene.remove(this.clientCubes[id]);
+        this.socket.once("initPlayerSetMe", (id) => {
+            console.log("我是本地用戶", id);
         })
-        /* 把所有伺服器的玩家一起更新進來 */
-        this.socket.on('updateClients', (allClients) => {
-            this.clients = allClients;
-            console.log("客戶端收到的總人數資料:", this.clients);
-            //D-4.伺服器收完資料後後，開始製作方塊
-            this.createOrUpdateBlock(this.clients);
+        this.socket.on("initPlayer", (id) => {
+            console.log("有玩家加入拉", id);
+        })
+    }
+    joinRoom(userName, roomID) { //從UI.js調用
+        this.socket.emit("joinRoom", userName, roomID);
+    }
+    RoomAnnouncement() { //從UI.js調用
+        this.socket.on("RoomAnnouncement_Me", (MyMatesID, MyMatesValue) => {
+            console.log("【RoomAnnouncement_Me】我自己收消息拉", MyMatesID, MyMatesValue);
+            /* MyMatesID    => 本人當前房間有哪些室友
+               MyMatesValue => 本人當前房間所有室友的詳細資料 */
+            let needInitUI = MyMatesID.length > 1 ? true : false
+            this.main.UiControl.openRoom('Init', { needInitUI, MyMatesID, MyMatesValue })//把介面處理丟到UI.js
+            this.MyRoomMates = MyMatesID;
+            this.MyMatesList = MyMatesValue;
+        })
+        this.socket.on("RoomAnnouncement", (id, MyMatesID, newMatesValue) => {
+            console.log("【RoomAnnouncement】室友收消息拉", MyMatesID, newMatesValue);
+            /* id            => 新人的ID
+               MyMatesID     => 更新室友名單
+               newMatesValue => 新人的詳細資料 */
+            this.main.UiControl.openRoom('update', { newMatesValue })//把介面處理丟到UI.js
+            this.MyRoomMates = MyMatesID;
+            this.MyMatesList[id] = newMatesValue; //直接加入新人
+        })
+    }
+    leaveRoom() { //從UI.js調用
+        this.socket.on("removePlayer", (id, MyMatesID, MyMatesValue) => {
+            /* id           => 離去的人的ID
+               MyMatesID    => 本人當前房間有哪些室友
+               MyMatesValue => 本人當前房間所有室友的詳細資料  */
+            console.log("【removePlayer】有玩家離開了=>", id, MyMatesID, MyMatesValue);
+            this.main.UiControl.openRoom('delete', { MyMatesID, MyMatesValue })
+            this.MyRoomMates = MyMatesID;
+            this.MyMatesList = MyMatesValue;
+
         });
     }
-    updateSocket() {
-
+    returnRoomBtn() { //從UI.js調用
+        this.socket.emit("returnLobby", this.socket.id);
     }
-    createMyBoxValue() { /* 建立隨機數值 */
-        // Generate a random size from 1 to 5
-        const size = 1 + Math.floor(Math.random() * 5);
-        // Generate a random x position from -10 to 10
-        const posX = Math.floor((Math.random() * 2 - 1) * 10);
-        // Generate a random y position from 0 to 15
-        const posY = Math.floor(0 + Math.random() * 16);
-        const posZ = Math.floor((Math.random() * 2 - 1) * 10);
-        const color = Math.floor(Math.random() * 0x100000).toString(16).padStart(6, '0');
-
-        const rotX = Math.floor(Math.random() * 360) * Math.PI / 180;
-        const rotY = Math.floor(Math.random() * 360) * Math.PI / 180;
-        const rotZ = Math.floor(Math.random() * 360) * Math.PI / 180;
-        return { size, posX, posY, posZ, color, rotX, rotY, rotZ };
-    }
-    createOrUpdateBlock(clients) {
-        Object.entries(clients).forEach(([id, client]) => { // 這裡會跑每一個client
-            if (!(id in this.clientCubes)) { // 如果方块不存在，则创建
-                const geometry = new THREE.BoxGeometry(client.size, client.size, client.size);
-                const material = new THREE.MeshBasicMaterial({ color: client.color });
-                const cube = new THREE.Mesh(geometry, material);
-                cube.position.set(client.pos.x, client.pos.y, client.pos.z);
-                cube.rotation.set(client.rot.x, client.rot.y, client.rot.z);
-                this.scene.add(cube);
-                this.clientCubes[id] = cube;
-            } else { // 如果方块存在，更新方块的位置和旋转
-                this.clientCubes[id].position.set(client.pos.x, client.pos.y, client.pos.z);
-                this.clientCubes[id].rotation.set(client.rot.x, client.rot.y, client.rot.z);
+    checkStateTo(type, data) {  //從UI.js調用 => 客戶端改變狀態，並傳送給伺服器 
+        /*  newType = [可以是 "playerState" | "color" | "size" | "pos" | "rot" ]
+            data    = [ 各自的狀態更新 ]  */
+        let newTypeArr;
+        if (Array.isArray(type)) { //A - 做參數的歸一化
+            newTypeArr = type;
+        } else {
+            newTypeArr = [type];
+            data = [data];
+        }
+        let client = this.MyMatesList[this.socket.id];
+        newTypeArr.forEach((elem, idx) => { //B - 改變個參數的狀態
+            client[elem] = data[idx];
+            switch (elem) {
+                case "playerState":
+                    break;
+                case "color":
+                    break;
+                case "size":
+                    break;
+                case "pos":
+                    break;
+                case "rot":
+                    break;
             }
         });
-        console.log([this.clientCubes]);
+        console.log("updateSetting=>", this.MyMatesList[this.socket.id]);
+        this.socket.emit("updateSetting", type, data);
     }
-    removeBlock(userId) {
-        const block = this.blocks[userId];
-        if (block) {
-            this.scene.remove(block); // 从场景中移除方块
-            delete this.blocks[userId]; // 从 blocks 对象中删除引用
-        }
+    /**
+     * 從UI.js調用 => 接收伺服器端更新某一個玩家的資訊，在這裡執行相應操作
+     */
+    receiveSetting() {
+        this.socket.on("takeUpdateSetting", (types, id, newMatesValue) => {
+            this.MyMatesList[id] = newMatesValue; //先更新該玩家數據
+            console.log("【takeUpdateSetting】=>", id, newMatesValue);
+            types.forEach((elem, idx) => { // 根據改動內容來更新UI情況
+                switch (elem) {
+                    case "playerState":
+                        let whichPlayer = parseInt(this.MyRoomMates.indexOf(id)) + 1;
+                        let readyStatus = this.main.UiControl.ConvertStateToText(newMatesValue.playerState);
+                        $(`#userList>li:nth-of-type(${whichPlayer})>#PutUserStatus`).text(readyStatus);
+                        break;
+                    case "color":
+                        break;
+                    case "size":
+                        break;
+                    case "pos":
+                        break;
+                    case "rot":
+                        break;
+                }
+            });
+        })
+
+        this.socket.on("canStartBTN", (bool) => {
+            if (this.MyRoomMates[0] === this.socket.id) {
+                $(".startGame").prop("disabled", !bool);
+            }
+        })
     }
-    createPlayer() {
-        this.player = new Player(this, this.Input, this.camera);
-        this.player.init();
+    updateSocket() {
     }
+    /* 初始化 */
+    // createOrUpdateBlock(clients) {
+    //     Object.entries(clients).forEach(([id, client]) => { // 這裡會跑每一個client
+    //         if (!(id in this.clientCubes)) { // 如果方块不存在，则创建
+    //             const geometry = new THREE.BoxGeometry(client.size, client.size, client.size);
+    //             const material = new THREE.MeshBasicMaterial({ color: client.color });
+    //             const cube = new THREE.Mesh(geometry, material);
+    //             cube.position.set(client.pos.x, client.pos.y, client.pos.z);
+    //             cube.rotation.set(client.rot.x, client.rot.y, client.rot.z);
+    //             this.scene.add(cube);
+    //             this.clientCubes[id] = cube;
+    //         } else { // 如果方块存在，更新方块的位置和旋转
+    //             this.clientCubes[id].position.set(client.pos.x, client.pos.y, client.pos.z);
+    //             this.clientCubes[id].rotation.set(client.rot.x, client.rot.y, client.rot.z);
+    //         }
+    //     });
+    //     console.log([this.clientCubes]);
+    // }
+    // removeBlock(userId) {
+    //     const block = this.blocks[userId];
+    //     if (block) {
+    //         this.scene.remove(block); // 从场景中移除方块
+    //         delete this.blocks[userId]; // 从 blocks 对象中删除引用
+    //     }
+    // }
+    // createPlayer() {
+    //     // this.player = new Player(this, this.Input, this.camera);
+    //     // this.player.init();
+    // }
 }

@@ -16,13 +16,14 @@
   </div>
   <div class="UI">
     <div class="OpenHouse hidden">
-      <h2>房號 #<span id="PutroomID">000000</span></h2>
-      <ul>
-        <li><span>名字</span><span>狀態</span></li>
+      <h2>房號-<span id="PutroomID">000000</span></h2>
+      <ul id="userList">
+        <li><span id="PutUserName">名字</span><span id="PutUserStatus">狀態</span></li>
       </ul>
       <div class="btns">
-        <button class="return">↺ RERURN ↺</button>
-        <button class="startGame">✦ START ✦</button>
+        <button class="returnLogin">↺ RERURN ↺</button>
+        <button class="readyGame hidden">✦ READY ✦</button>
+        <button class="startGame hidden" disabled="true">✦ START ✦</button>
       </div>
     </div>
     <div class="Login">
@@ -36,12 +37,19 @@
           <div class="textbox">
             <h4>✦ 輸入房號</h4>
             <p>( 不輸的話就是開新房 )</p>
-            <p>( 輸入同樣的就是加入該房間 )</p>
+            <p>( 輸入未存在的房號 => 開新房 )</p>
+            <p>( 輸入已存在的房號 => 加入房間 )</p>
             <input id="roomID" type="text">
           </div>
           <button class="joinGame">✦ 加入遊戲 ✦</button>
         </section>
       </div>
+    </div>
+  </div>
+  <div class="dialog hidden">
+    <div class="dialogBox">
+      <p id="remindText">fewfwefgqerfq</p>
+      <button class="btn close">X</button>
     </div>
   </div>
   <script type="module" src="./main.js"></script>

@@ -10,8 +10,6 @@ import { Player } from './player.js';
 import { UiControl } from './ui.js';
 import { Client } from './client.js';
 
-import { io } from 'socket.io-client';//npm i --save-dev socket.io-client
-
 class ThreeScene {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
@@ -42,7 +40,7 @@ class ThreeScene {
     async init() {
         await this.physicsWorld.init();
         //要把加入碰撞場景，加入鍵盤監聽 ，加入汽車 Vehicle 這個檔在完成this.LD.init()才可以加入
-        await this.LD.init();
+        await this.LD.init(this.createBasicScene.bind(this));
 
         this.createScene();
         this.creatSkybox();
@@ -52,7 +50,8 @@ class ThreeScene {
         this.Camera.init();
         this.UiControl.init();
 
-        this.animate(); // 放在這裡是因為必須等到模型Loading結束
+        // this.animate(); // 改成按下UI開始後，才開始
+        this.renderer.render(this.scene, this.camera);
     }
     update() {
         this.Camera.update();
@@ -67,7 +66,6 @@ class ThreeScene {
         this.renderer.render(this.scene, this.camera);
         this.renderer.setAnimationLoop(this.animate.bind(this));
     }
-
 
     /* 建立基礎世界 + Resize */
     createScene() {
@@ -122,7 +120,6 @@ class ThreeScene {
         });
     }
 
-
     /* 測試加入物件 */
     createBasicScene() {
         const that = this;
@@ -169,7 +166,6 @@ class ThreeScene {
         let { model, rigidBody, rigidBodyDesc } = this.physicsWorld.createRigidBody(rotateColumn, rotateColumn.position, 'kinematicPositionBased', 5);
         this.co_rotateColumn_RGBody = rigidBody;
         this.co_rotateColumn_RGDesc = rigidBodyDesc;
-
     }
 
     updateSceneAni() {
